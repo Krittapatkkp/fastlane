@@ -23,6 +23,12 @@ platform :ios do
   desc "Sync signing"
   lane :signing do
     sync_code_signing # match
+    mapping = Actions.lane_context[
+      SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING
+    ]
+    update_code_signing_settings(
+      profile_name: mapping[ENV['MATCH_APP_IDENTIFIER']]
+    )
   end
 
   desc "Build buinary"
@@ -36,4 +42,12 @@ platform :ios do
 #    build_app(scheme: "TestFastlane")
 #    upload_to_app_store
   end
+  desc "Upload Beta"
+  lane :beta do
+    signing
+    increment_build_number(xcodeproj: "TestFastlane.xcodeproj")
+    build_app(scheme: "TestFastlane")
+    upload_to_testflight
+  end
+
 end
